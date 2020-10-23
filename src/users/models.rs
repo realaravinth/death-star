@@ -46,6 +46,15 @@ pub struct Creds {
     pub password: String,
 }
 
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct LoginRequestPayload {
+    pub password: String,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Serialize)]
+pub struct LoginResponsetPayload {
+    pub isAuthenticated: bool,
+}
 //#[derive(Debug, Deserialize, PartialEq, Serialize)]
 //pub struct ProcessCreds {
 //    pub normalised_username: String,

@@ -22,8 +22,8 @@ use actix_web::{web, HttpResponse, Responder};
 use futures;
 
 use super::create_new_user;
-use super::{Creds, NewCreds};
-use crate::errors::ServiceResult;
+use super::{Creds, LoginRequestPayload, NewCreds};
+use crate::errors::*;
 use crate::pow::verify_pow;
 
 pub async fn sign_up(
@@ -39,13 +39,13 @@ pub async fn sign_up(
         .finish())
 }
 
-pub async fn sign_in(
-    session: Session,
-    creds: web::Json<Creds>,
-    id: Identity,
-) -> ServiceResult<impl Responder> {
-    unimplemented!();
-    Ok(HttpResponse::Ok().finish())
+pub async fn sign_in(creds: web::Json<LoginRequestPayload>) -> ServiceResult<impl Responder> {
+    let response = super::utils::utils::verify(creds.into_inner()).await;
+    if response {
+        return Ok(HttpResponse::Ok().finish());
+    } else {
+        return Err(ServiceError::AuthorizationRequired);
+    }
 }
 
 pub async fn sign_out(id: Identity) -> ServiceResult<impl Responder> {
@@ -54,3 +54,46 @@ pub async fn sign_out(id: Identity) -> ServiceResult<impl Responder> {
         .content_type("text/html")
         .body("You are successfully signed out"))
 }
+
+pub async fn index() -> impl Responder {
+    HttpResponse::Ok().content_type("text/html").body(INDEX)
+}
+
+pub static INDEX: &'static str = "
+<!DOCTYPE html>
+<html>
+  <head>
+    <script>
+      const submitForm = () => {
+        const password = document.getElementById('password').value;
+        postData(password).then(
+        console.log('submit'));
+      };
+      async function postData(password) {
+
+        const payload = {
+            'password': password,
+        };
+        console.log(payload)
+        const response = await fetch('/api/login', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+        if (response.ok) {
+          alert('Succes!')
+        } else {
+          alert('Authentication failed');
+        }
+      }
+    </script>
+  </head>
+  <body>
+      <p>Password:</p>
+      <input type='password' id='password' value='password' name='password' /><br />
+      <input type='button' value='SUBMIT' onclick='submitForm()'>
+  </body>
+</html>
+";
